@@ -2,18 +2,19 @@ package dev.doctor4t.trainmurdermystery.index;
 
 import dev.doctor4t.ratatouille.util.registrar.ItemRegistrar;
 import dev.doctor4t.trainmurdermystery.TrainMurderMystery;
+import dev.doctor4t.trainmurdermystery.item.KnifeItem;
 import dev.doctor4t.trainmurdermystery.item.LockpickItem;
 import dev.doctor4t.trainmurdermystery.item.RevolverItem;
 import dev.doctor4t.trainmurdermystery.item.RoomKeyItem;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
+
+import javax.tools.Tool;
 
 public interface TrainMurderMysteryItems {
     ItemRegistrar registrar = new ItemRegistrar(TrainMurderMystery.MOD_ID);
@@ -24,10 +25,8 @@ public interface TrainMurderMysteryItems {
 
     Item ROOM_KEY = registrar.create("room_key", new RoomKeyItem(new Item.Settings().maxCount(1)), EQUIPMENT_GROUP);
     Item LOCKPICK = registrar.create("lockpick", new LockpickItem(new Item.Settings().maxCount(1)), EQUIPMENT_GROUP);
-    Item KNIFE = registrar.create("knife", new Item(new Item.Settings().maxCount(1)), EQUIPMENT_GROUP);
+    Item KNIFE = registrar.create("knife", new KnifeItem(new Item.Settings().maxCount(1).attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.IRON, 6, -2.5F))), EQUIPMENT_GROUP);
     Item REVOLVER = registrar.create("revolver", new RevolverItem(new Item.Settings().maxCount(1)), EQUIPMENT_GROUP);
-//    Item POISON_VIAL = registrar.create("poison_vial", new PoisonVialItem(new Item.Settings().maxCount(1)), EQUIPMENT_GROUP);
-//    Item SCORPION = registrar.create("scorpion", new ScorpionItem(new Item.Settings().maxCount(1)), EQUIPMENT_GROUP);
 
     static void initialize() {
         registrar.registerEntries();

@@ -54,3 +54,4 @@ public class TrainMurderMystery implements ModInitializer {
 // TODO: Add drink cabinet
 // TODO: Add instinct
 // TODO: Add death when off the train
+// TODO: Nicer starting phase + UI

@@ -1,7 +1,12 @@
 package dev.doctor4t.trainmurdermystery.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.doctor4t.trainmurdermystery.TrainMurderMystery;
+import dev.doctor4t.trainmurdermystery.index.TrainMurderMysteryItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -51,6 +56,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             if (sprintingTicks <= 0) {
                 this.setSprinting(false);
             }
+        }
+    }
+
+    @WrapMethod(method = "attack")
+    public void attack(Entity target, Operation<Void> original) {
+        if (this.getMainHandStack().isOf(TrainMurderMysteryItems.KNIFE)) {
+            original.call(target);
         }
     }
 }
