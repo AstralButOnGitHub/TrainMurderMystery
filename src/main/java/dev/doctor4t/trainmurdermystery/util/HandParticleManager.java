@@ -67,11 +67,47 @@ public class HandParticleManager {
     }
 
     private static void putVertex(VertexConsumer consumer, Matrix4f model, Vector3f pos, float u, float v, HandParticle p) {
+        float t = p.age / p.maxAge;
+
+        int n = p.rColors.length;
+        float r, g, b;
+        if (n == 1) {
+            r = p.rColors[0]; g = p.gColors[0]; b = p.bColors[0];
+        } else {
+            float scaled = t * (n - 1);
+            int idx = (int) Math.floor(scaled);
+            int next = Math.min(idx + 1, n - 1);
+            float localT = scaled - idx;
+
+            r = lerp(localT, p.rColors[idx], p.rColors[next]);
+            g = lerp(localT, p.gColors[idx], p.gColors[next]);
+            b = lerp(localT, p.bColors[idx], p.bColors[next]);
+        }
+
+        n = p.aColors.length;
+        float a;
+        if (n == 1) a = p.aColors[0];
+        else {
+            float scaled = t * (n - 1);
+            int idx = (int) Math.floor(scaled);
+            int next = Math.min(idx + 1, n - 1);
+            float localT = scaled - idx;
+            a = lerp(localT, p.aColors[idx], p.aColors[next]);
+        }
+
+        float displayR = r * a;
+        float displayG = g * a;
+        float displayB = b * a;
+
         consumer.vertex(model, pos.x, pos.y, pos.z)
-                .color(p.r, p.g, p.b, p.a)
+                .color(displayR, displayG, displayB, a)
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(p.light)
                 .normal(0f, 1f, 0f);
+    }
+
+    private static float lerp(float t, float a, float b) {
+        return a + t * (b - a);
     }
 }

@@ -17,7 +17,10 @@ public class HandParticle {
     public int frames;
     public boolean loop;
     public float u0, v0, u1, v1;
-    public float r = 1f, g = 1f, b = 1f, a = 1f;
+    public float[] rColors = {1f};
+    public float[] gColors = {1f};
+    public float[] bColors = {1f};
+    public float[] aColors = {1f};
 
 
     public Function<Identifier, RenderLayer> renderLayerFactory;
@@ -100,38 +103,29 @@ public class HandParticle {
         return this;
     }
 
-    public HandParticle setColor(float r, float g, float b, float a) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
-        return this;
-    }
+    public HandParticle setColor(Color... colors) {
+        if (colors.length == 0) return this;
 
-    public HandParticle setColor(float r, float g, float b) {
-        return setColor(r, g, b, 1f);
-    }
+        int n = colors.length;
+        this.rColors = new float[n];
+        this.gColors = new float[n];
+        this.bColors = new float[n];
+        this.aColors = new float[n];
 
-    public HandParticle setColor(int hex) {
-        if ((hex & 0xFF000000) != 0) {
-            this.r = ((hex >> 24) & 0xFF) / 255f;
-            this.g = ((hex >> 16) & 0xFF) / 255f;
-            this.b = ((hex >> 8) & 0xFF) / 255f;
-            this.a = (hex & 0xFF) / 255f;
-        } else {
-            this.r = ((hex >> 16) & 0xFF) / 255f;
-            this.g = ((hex >> 8) & 0xFF) / 255f;
-            this.b = (hex & 0xFF) / 255f;
-            this.a = 1f;
+        for (int i = 0; i < n; i++) {
+            Color c = colors[i];
+            this.rColors[i] = c.getRed() / 255f;
+            this.gColors[i] = c.getGreen() / 255f;
+            this.bColors[i] = c.getBlue() / 255f;
+            this.aColors[i] = c.getAlpha() / 255f;
         }
         return this;
     }
 
-    public HandParticle setColor(Color color) {
-        this.r = color.getRed() / 255f;
-        this.g = color.getGreen() / 255f;
-        this.b = color.getBlue() / 255f;
-        this.a = color.getAlpha() / 255f;
+    public HandParticle setAlpha(float... alphas) {
+        if (alphas.length == 0) return this;
+        this.aColors = new float[alphas.length];
+        System.arraycopy(alphas, 0, this.aColors, 0, alphas.length);
         return this;
     }
 }

@@ -76,18 +76,17 @@ public class RevolverItem extends Item {
             if (bullets > 0) {
                 user.setPitch(user.getPitch() - 4);
 
-                HandParticle particle_animated = new HandParticle()
+                HandParticle handParticle = new HandParticle()
                         .setTexture(TMM.id("textures/particle/gunshot.png"))
-                        .setAnimation(17, false)
                         .setPos(0.1f, 0.275f, -0.2f)
                         .setMaxAge(8)
                         .setSize(0.5f)
                         .setVelocity(0f, 0f, 0f)
                         .setLight(15, 15)
-                        .setColor(new Color(0xff000090))
+                        .setAlpha(0.1f, 1f, 1f, 1f, 0.1f)
                         .setRenderLayer(TMMRenderLayers::additive);
 
-                TMMClient.handParticleManager.spawn(particle_animated);
+                TMMClient.handParticleManager.spawn(handParticle);
 
                 return TypedActionResult.consume(user.getStackInHand(hand));
             } else {
