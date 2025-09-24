@@ -6,27 +6,34 @@ import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.client.model.TrainMurderMysteryEntityModelLayers;
 import dev.doctor4t.trainmurdermystery.entity.PlayerBodyEntity;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.model.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.SkeletonEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
 public class PlayerBodyEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> extends LivingEntityRenderer<PlayerBodyEntity, PlayerEntityModel<PlayerBodyEntity>> {
     public static final Identifier DEFAULT_TEXTURE = TMM.id("textures/entity/player_body_default.png");
+    private static final Identifier SKELETON_TEXTURE = Identifier.ofVanilla("textures/entity/skeleton/skeleton.png");
+
+    protected SkeletonEntityModel<SkeletonEntity> skeletonModel;
 
     public PlayerBodyEntityRenderer(EntityRendererFactory.Context ctx, boolean slim) {
         super(ctx, new PlayerEntityModel<>(ctx.getPart(slim ? TrainMurderMysteryEntityModelLayers.PLAYER_BODY_SLIM : TrainMurderMysteryEntityModelLayers.PLAYER_BODY), slim), 0F);
+        skeletonModel = new SkeletonEntityModel<>(ctx.getPart(EntityModelLayers.SKELETON));
     }
 
-    public void render(PlayerBodyEntity playerBodyEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
+    public void render(PlayerBodyEntity playerBodyEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light) {
         this.setModelPose();
-        super.render(playerBodyEntity, f, g, matrixStack, vertexConsumerProvider, i);
+        super.render(playerBodyEntity, f, g, matrixStack, vertexConsumerProvider, light);
+        skeletonModel.render(matrixStack, vertexConsumerProvider.getBuffer(RenderLayer.getEntityCutout(SKELETON_TEXTURE)), light, OverlayTexture.DEFAULT_UV);
     }
 
     private void setModelPose() {
