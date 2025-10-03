@@ -104,9 +104,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (poisoner != null) {
             var poisonTicks = PlayerPoisonComponent.KEY.get(this).poisonTicks;
             if (poisonTicks == -1) {
-                PlayerPoisonComponent.KEY.get(this).setPoisonTicks(Random.createThreadSafe().nextBetween(PlayerPoisonComponent.clampTime.getLeft(), PlayerPoisonComponent.clampTime.getRight()), UUID.fromString(poisoner));
+                PlayerPoisonComponent.KEY.get(this).setPoisonTicks(world.getRandom().nextBetween(PlayerPoisonComponent.clampTime.getLeft(), PlayerPoisonComponent.clampTime.getRight()), UUID.fromString(poisoner));
             } else {
-                PlayerPoisonComponent.KEY.get(this).setPoisonTicks(MathHelper.clamp(poisonTicks - Random.createThreadSafe().nextBetween(100, 300), 0, PlayerPoisonComponent.clampTime.getRight()), UUID.fromString(poisoner));
+                PlayerPoisonComponent.KEY.get(this).setPoisonTicks(MathHelper.clamp(poisonTicks - world.getRandom().nextBetween(100, 300), 0, PlayerPoisonComponent.clampTime.getRight()), UUID.fromString(poisoner));
             }
         }
     }

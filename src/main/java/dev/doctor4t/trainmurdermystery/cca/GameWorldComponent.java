@@ -29,6 +29,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
     public enum GameStatus {
         INACTIVE, STARTING, ACTIVE, STOPPING
     }
+    private boolean discoveryMode = false;
 
     private GameStatus gameStatus = GameStatus.INACTIVE;
     private int fade = 0;
@@ -155,8 +156,19 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
         this.sync();
     }
 
+    public boolean isDiscoveryMode() {
+        return discoveryMode;
+    }
+
+    public void setDiscoveryMode(boolean discoveryMode) {
+        this.discoveryMode = discoveryMode;
+        this.sync();
+    }
+
     @Override
     public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
+        this.setDiscoveryMode(nbtCompound.getBoolean("DiscoveryMode"));
+
         this.setGameStatus(GameStatus.valueOf(nbtCompound.getString("GameStatus")));
 
         this.setFade(nbtCompound.getInt("Fade"));
@@ -177,6 +189,8 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
 
     @Override
     public void writeToNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
+        nbtCompound.putBoolean("DiscoveryMode", discoveryMode);
+
         nbtCompound.putString("GameStatus", this.gameStatus.toString());
 
         nbtCompound.putInt("Fade", fade);
@@ -259,7 +273,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
                 GameFunctions.WinStatus winStatus = killsLeft <= 0 ? GameFunctions.WinStatus.KILLERS : GameFunctions.WinStatus.NONE;
 
                 // check passenger win condition (all killers are dead)
-                if (winStatus == GameFunctions.WinStatus.NONE) {
+                if (!discoveryMode && winStatus == GameFunctions.WinStatus.NONE) {
                     winStatus = GameFunctions.WinStatus.PASSENGERS;
                     for (UUID player : this.getKillers()) {
                         if (!GameFunctions.isPlayerEliminated(serverWorld.getPlayerByUuid(player))) {
@@ -270,6 +284,11 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
 
                 // check if out of time
                 if (winStatus == GameFunctions.WinStatus.NONE && !GameTimeComponent.KEY.get(serverWorld).hasTime()) winStatus = GameFunctions.WinStatus.TIME;
+
+                // stop game if ran out of time on discovery mode
+                if (winStatus == GameFunctions.WinStatus.TIME && discoveryMode) {
+                    GameFunctions.stopGame(serverWorld);
+                }
 
                 // win display
                 if (winStatus != GameFunctions.WinStatus.NONE && this.gameStatus == GameStatus.ACTIVE) {

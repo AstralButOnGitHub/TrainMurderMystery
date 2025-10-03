@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.client.gui;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerMoodComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerPsychoComponent;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
@@ -42,7 +43,8 @@ public class MoodRenderer {
 
     @Environment(EnvType.CLIENT)
     public static void renderHud(@NotNull PlayerEntity player, TextRenderer textRenderer, DrawContext context, RenderTickCounter tickCounter) {
-        if (!TMMComponents.GAME.get(player.getWorld()).isRunning() || !TMMClient.isPlayerAliveAndInSurvival()) return;
+        GameWorldComponent gameWorldComponent = TMMComponents.GAME.get(player.getWorld());
+        if (!gameWorldComponent.isRunning() || !TMMClient.isPlayerAliveAndInSurvival() || gameWorldComponent.isDiscoveryMode()) return;
         var component = PlayerMoodComponent.KEY.get(player);
         var oldMood = moodRender;
         moodRender = MathHelper.lerp(tickCounter.getTickDelta(true) / 8, moodRender, component.getMood());
@@ -85,7 +87,7 @@ public class MoodRenderer {
             moodOffset = MathHelper.lerp(tickCounter.getTickDelta(true) / 8, moodOffset, maxRenderer.offset);
             moodTextWidth = MathHelper.lerp(tickCounter.getTickDelta(true) / 32, moodTextWidth, textRenderer.getWidth(maxRenderer.text));
         }
-        if (TMMComponents.GAME.get(player.getWorld()).isKiller(player)) {
+        if (gameWorldComponent.isKiller(player)) {
             renderKiller(textRenderer, context);
         } else {
             renderCivilian(textRenderer, context, oldMood);

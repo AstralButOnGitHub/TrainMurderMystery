@@ -43,6 +43,7 @@ public class TMM implements ModInitializer {
             GiveRoomKeyCommand.register(dispatcher);
             SetTrainSpeedCommand.register(dispatcher);
             StartCommand.register(dispatcher);
+            StartDiscoveryCommand.register(dispatcher);
             StopCommand.register(dispatcher);
             TestStartGameCommand.register(dispatcher);
             ForceStop.register(dispatcher);

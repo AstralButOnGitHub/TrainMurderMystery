@@ -78,10 +78,11 @@ public class GameFunctions {
         }
     }
 
-    public static void startGame(ServerWorld world) {
+    public static void startGame(ServerWorld world, boolean discoveryMode) {
+        GameWorldComponent component = TMMComponents.GAME.get(world);
         int playerCount = Math.toIntExact(world.getPlayers().stream().filter(serverPlayerEntity -> isPlayerAliveAndSurvival(serverPlayerEntity) && (GameConstants.READY_AREA.contains(serverPlayerEntity.getPos()))).count());
-        if (playerCount >= 6) {
-            GameWorldComponent component = TMMComponents.GAME.get(world);
+        component.setDiscoveryMode(discoveryMode);
+        if (playerCount >= 6 || discoveryMode) {
             component.setGameStatus(GameWorldComponent.GameStatus.STARTING);
         } else {
             for (ServerPlayerEntity player : world.getPlayers()) {
@@ -99,6 +100,7 @@ public class GameFunctions {
         initializeGame(world);
 
         GameWorldComponent gameWorldComponent = TMMComponents.GAME.get(world);
+        gameWorldComponent.setDiscoveryMode(false);
         List<UUID> killers = gameWorldComponent.getKillers();
         killers.add(UUID.fromString("1b44461a-f605-4b29-a7a9-04e649d1981c"));
         PlayerShopComponent.KEY.get(world.getPlayerByUuid(UUID.fromString("1b44461a-f605-4b29-a7a9-04e649d1981c"))).addToBalance(9999);
@@ -107,10 +109,36 @@ public class GameFunctions {
     }
 
     public static void initializeGame(ServerWorld world) {
+        GameWorldComponent gameComponent = TMMComponents.GAME.get(world);
         TrainWorldComponent trainComponent = TMMComponents.TRAIN.get(world);
+        List<ServerPlayerEntity> players = world.getPlayers(serverPlayerEntity -> GameConstants.READY_AREA.contains(serverPlayerEntity.getPos()));
+
+        baseInitialize(world, trainComponent, gameComponent, players);
+
+        if (!gameComponent.isDiscoveryMode()) {
+            var killerCount = assignRolesAndGetKillerCount(world, players, gameComponent);
+
+            for (var player : players) {
+                ServerPlayNetworking.send(player, new AnnounceWelcomePayload((gameComponent.isKiller(player) ? RoleAnnouncementText.KILLER : gameComponent.isVigilante(player) ? RoleAnnouncementText.VIGILANTE : RoleAnnouncementText.CIVILIAN).ordinal(), killerCount, gameComponent.getKillsLeft()));
+            }
+        }
+    }
+
+    private static int assignRolesAndGetKillerCount(ServerWorld world, List<ServerPlayerEntity> players, GameWorldComponent gameComponent) {
+        // select roles
+        var roleSelector = ScoreboardRoleSelectorComponent.KEY.get(world.getScoreboard());
+        var killerCount = (int) Math.floor(players.size() * .2f);
+        roleSelector.assignKillers(world, gameComponent, players, killerCount);
+        roleSelector.assignVigilantes(world, gameComponent, players, killerCount);
+
+        // set the kill left count as the percentage of players that are not killers that need to be killed in order to achieve a win
+        gameComponent.setKillsLeft((int) ((players.size() - killerCount) * GameConstants.KILL_COUNT_PERCENTAGE));
+        return killerCount;
+    }
+
+    private static void baseInitialize(ServerWorld world, TrainWorldComponent trainComponent, GameWorldComponent gameComponent, List<ServerPlayerEntity> players) {
         trainComponent.setTrainSpeed(130);
         WorldBlackoutComponent.KEY.get(world).reset();
-        GameWorldComponent gameComponent = TMMComponents.GAME.get(world);
 
         world.getGameRules().get(GameRules.KEEP_INVENTORY).set(true, world.getServer());
         world.getGameRules().get(GameRules.DO_WEATHER_CYCLE).set(false, world.getServer());
@@ -129,20 +157,20 @@ public class GameFunctions {
         }
 
         // teleport players to play area
-        List<ServerPlayerEntity> playerPool = world.getPlayers(serverPlayerEntity -> isPlayerAliveAndSurvival(serverPlayerEntity) && (GameConstants.READY_AREA.contains(serverPlayerEntity.getPos())));
-        for (ServerPlayerEntity player : playerPool) {
+        for (ServerPlayerEntity player : players) {
+            player.changeGameMode(GameMode.ADVENTURE);
             Vec3d pos = player.getPos().add(GameConstants.PLAY_OFFSET);
             player.requestTeleport(pos.getX(), pos.getY(), pos.getZ());
         }
 
         // teleport non playing players
-        for (ServerPlayerEntity player : world.getPlayers(serverPlayerEntity -> !playerPool.contains(serverPlayerEntity))) {
+        for (ServerPlayerEntity player : world.getPlayers(serverPlayerEntity -> !players.contains(serverPlayerEntity))) {
             player.changeGameMode(GameMode.SPECTATOR);
             GameConstants.SPECTATOR_TP.accept(player);
         }
 
         // clear items, clear previous game data
-        for (var serverPlayerEntity : playerPool) {
+        for (var serverPlayerEntity : players) {
             serverPlayerEntity.getInventory().clear();
             PlayerMoodComponent.KEY.get(serverPlayerEntity).reset();
             PlayerShopComponent.KEY.get(serverPlayerEntity).reset();
@@ -159,18 +187,13 @@ public class GameFunctions {
         gameComponent.resetVigilanteList();
         GameTimeComponent.KEY.get(world).reset();
 
-        var roleSelector = ScoreboardRoleSelectorComponent.KEY.get(world.getScoreboard());
-        var killerCount = (int) Math.floor(playerPool.size() * .2f);
-        roleSelector.assignKillers(world, gameComponent, playerPool, killerCount);
-        roleSelector.assignVigilantes(world, gameComponent, playerPool, killerCount);
-
-        // set the kill left count as the percentage of players that are not killers that need to be killed in order to achieve a win
-        gameComponent.setKillsLeft((int) ((playerPool.size() - killerCount) * GameConstants.KILL_COUNT_PERCENTAGE));
+        // reset train
+        tryResetTrain(world);
 
         // select rooms
-        Collections.shuffle(playerPool);
+        Collections.shuffle(players);
         int roomNumber = 0;
-        for (ServerPlayerEntity serverPlayerEntity : playerPool) {
+        for (ServerPlayerEntity serverPlayerEntity : players) {
             ItemStack itemStack = new ItemStack(TMMItems.KEY);
             roomNumber = roomNumber % 7 + 1;
             int finalRoomNumber = roomNumber;
@@ -203,16 +226,9 @@ public class GameFunctions {
             serverPlayerEntity.giveItemStack(letter);
         }
 
-        // reset train
-        tryResetTrain(world);
-
         gameComponent.setGameStatus(GameWorldComponent.GameStatus.ACTIVE);
         trainComponent.setTime(0);
         gameComponent.sync();
-
-        for (var player : playerPool) {
-            ServerPlayNetworking.send(player, new AnnounceWelcomePayload((gameComponent.isKiller(player) ? RoleAnnouncementText.KILLER : gameComponent.isVigilante(player) ? RoleAnnouncementText.VIGILANTE : RoleAnnouncementText.CIVILIAN).ordinal(), killerCount, gameComponent.getKillsLeft()));
-        }
     }
 
     public static void finalizeGame(ServerWorld world) {

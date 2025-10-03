@@ -13,9 +13,9 @@ public class PoisonParticle extends SpriteBillboardParticle {
         this.maxAge = 16;
         this.scale = 0.2f;
         this.setVelocity(
-                vx + (Random.createThreadSafe().nextBetween(0, 100) / 4000f) * (Random.createThreadSafe().nextBoolean() ? -1 : 1),
+                vx + (world.getRandom().nextBetween(0, 100) / 4000f) * (world.getRandom().nextBoolean() ? -1 : 1),
                 vy,
-                vz + (Random.createThreadSafe().nextBetween(0, 100) / 4000f) * (Random.createThreadSafe().nextBoolean() ? -1 : 1));
+                vz + (world.getRandom().nextBetween(0, 100) / 4000f) * (world.getRandom().nextBoolean() ? -1 : 1));
 
         this.red = 1f;
         this.green = 1f;

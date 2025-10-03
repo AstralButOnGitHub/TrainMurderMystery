@@ -55,7 +55,7 @@ public class TrimmedBedBlockEntity extends BlockEntity {
         TrimmedBedBlockEntity entity = (TrimmedBedBlockEntity) t;
         if (!TMMClient.isKiller()) return;
         if (!entity.hasScorpion()) return;
-        if (Random.createThreadSafe().nextBetween(0, 20) < 17) return;
+        if (world.getRandom().nextBetween(0, 20) < 17) return;
 
         world.addParticle(
                 TMMParticles.POISON,

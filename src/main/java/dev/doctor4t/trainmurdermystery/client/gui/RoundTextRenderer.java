@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.client.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.GameRoundEndComponent;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
@@ -54,7 +55,7 @@ public class RoundTextRenderer {
             context.getMatrices().pop();
         }
         var game = TMMComponents.GAME.get(player.getWorld());
-        if (endTime > 0 && endTime < END_DURATION - (GameConstants.FADE_TIME * 2) && !game.isRunning()) {
+        if (endTime > 0 && endTime < END_DURATION - (GameConstants.FADE_TIME * 2) && !game.isRunning() && !game.isDiscoveryMode()) {
             var roundEnd = GameRoundEndComponent.KEY.get(player.getWorld());
             if (roundEnd.getWinStatus() == GameFunctions.WinStatus.NONE) return;
             var endText = role.getEndText(roundEnd.getWinStatus());
@@ -124,40 +125,43 @@ public class RoundTextRenderer {
     }
 
     public static void tick() {
-        if (welcomeTime > 0) {
-            switch (welcomeTime) {
-                case 200 -> {
-                    var player = MinecraftClient.getInstance().player;
-                    if (player != null) player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_RISER, SoundCategory.MASTER, 10f, 1f, player.getRandom().nextLong());
+        if (!TMMComponents.GAME.get(MinecraftClient.getInstance().world).isDiscoveryMode()) {
+            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+            if (welcomeTime > 0) {
+                switch (welcomeTime) {
+                    case 200 -> {
+                        if (player != null)
+                            player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_RISER, SoundCategory.MASTER, 10f, 1f, player.getRandom().nextLong());
+                    }
+                    case 180 -> {
+                        if (player != null)
+                            player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundCategory.MASTER, 10f, 1.25f, player.getRandom().nextLong());
+                    }
+                    case 120 -> {
+                        if (player != null)
+                            player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundCategory.MASTER, 10f, 1.5f, player.getRandom().nextLong());
+                    }
+                    case 60 -> {
+                        if (player != null)
+                            player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundCategory.MASTER, 10f, 1.75f, player.getRandom().nextLong());
+                    }
+                    case 1 -> {
+                        if (player != null)
+                            player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO_STINGER, SoundCategory.MASTER, 10f, 1f, player.getRandom().nextLong());
+                    }
                 }
-                case 180 -> {
-                    var player = MinecraftClient.getInstance().player;
-                    if (player != null) player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundCategory.MASTER, 10f, 1.25f, player.getRandom().nextLong());
-                }
-                case 120 -> {
-                    var player = MinecraftClient.getInstance().player;
-                    if (player != null) player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundCategory.MASTER, 10f, 1.5f, player.getRandom().nextLong());
-                }
-                case 60 -> {
-                    var player = MinecraftClient.getInstance().player;
-                    if (player != null) player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundCategory.MASTER, 10f, 1.75f, player.getRandom().nextLong());
-                }
-                case 1 -> {
-                    var player = MinecraftClient.getInstance().player;
-                    if (player != null) player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO_STINGER, SoundCategory.MASTER, 10f, 1f, player.getRandom().nextLong());
-                }
+                welcomeTime--;
             }
-            welcomeTime--;
-        }
-        if (endTime > 0) {
-            if (endTime == END_DURATION - (GameConstants.FADE_TIME * 2)) {
-                var player = MinecraftClient.getInstance().player;
-                if (player != null) player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), GameRoundEndComponent.KEY.get(player.getWorld()).didWin(player.getUuid()) ? TMMSounds.UI_PIANO_WIN : TMMSounds.UI_PIANO_LOSE, SoundCategory.MASTER, 10f, 1f, player.getRandom().nextLong());
+            if (endTime > 0) {
+                if (endTime == END_DURATION - (GameConstants.FADE_TIME * 2)) {
+                    if (player != null)
+                        player.getWorld().playSound(player, player.getX(), player.getY(), player.getZ(), GameRoundEndComponent.KEY.get(player.getWorld()).didWin(player.getUuid()) ? TMMSounds.UI_PIANO_WIN : TMMSounds.UI_PIANO_LOSE, SoundCategory.MASTER, 10f, 1f, player.getRandom().nextLong());
+                }
+                endTime--;
             }
-            endTime--;
+            var options = MinecraftClient.getInstance().options;
+            if (options != null && options.playerListKey.isPressed()) endTime = Math.max(2, endTime);
         }
-        var options = MinecraftClient.getInstance().options;
-        if (options != null && options.playerListKey.isPressed()) endTime = Math.max(2, endTime);
     }
 
     public static void startWelcome(RoleAnnouncementText role, int killers, int targets) {
@@ -184,4 +188,5 @@ public class RoundTextRenderer {
     public static Optional<GameProfile> failCache(String name) {
         return failCache.computeIfAbsent(name, (d) -> Optional.of(new GameProfile(UUID.randomUUID(), name)));
     }
+
 }

@@ -65,7 +65,7 @@ public class HornBlock extends BlockWithEntity implements Waterloggable {
 
                 // start game
                 if (isOp && !TMMComponents.GAME.get(serverWorld).isRunning()) {
-                    GameFunctions.startGame(serverWorld);
+                    GameFunctions.startGame(serverWorld, false);
                 }
 
                 hornBlockEntity.pull(1);

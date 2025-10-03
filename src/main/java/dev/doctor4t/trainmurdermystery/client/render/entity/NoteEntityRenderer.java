@@ -10,6 +10,7 @@ import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.NotNull;
@@ -46,6 +47,6 @@ public class NoteEntityRenderer extends EntityRenderer<NoteEntity> {
 
     @Override
     public Identifier getTexture(NoteEntity entity) {
-        return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
+        return PlayerScreenHandler.BLOCK_ATLAS_TEXTURE;
     }
 }

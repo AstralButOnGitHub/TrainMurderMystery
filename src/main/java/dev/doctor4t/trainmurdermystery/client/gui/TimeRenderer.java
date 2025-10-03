@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.client.gui;
 
 import dev.doctor4t.trainmurdermystery.cca.GameTimeComponent;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
@@ -16,24 +17,25 @@ public class TimeRenderer {
     public static float offsetDelta = 0f;
 
     public static void renderHud(TextRenderer renderer, @NotNull ClientPlayerEntity player, @NotNull DrawContext context, float delta) {
-        if (!TMMComponents.GAME.get(player.getWorld()).isRunning()) return;
-        if (!TMMComponents.GAME.get(player.getWorld()).isKiller(player) && !GameFunctions.isPlayerSpectatingOrCreative(player)) return;
-        var time = GameTimeComponent.KEY.get(player.getWorld()).getTime();
-        if (Math.abs(view.getTarget() - time) > 10) offsetDelta = time > view.getTarget() ? .6f : -.6f;
-        if (time < GameConstants.getInTicks(1, 0)) {
-            offsetDelta = -0.9f;
-        } else {
-            offsetDelta = MathHelper.lerp(delta / 16, offsetDelta, 0f);
+        GameWorldComponent gameWorldComponent = TMMComponents.GAME.get(player.getWorld());
+        if (gameWorldComponent.isRunning() && (gameWorldComponent.isDiscoveryMode() || gameWorldComponent.isKiller(player) || GameFunctions.isPlayerSpectatingOrCreative(player))) {
+            var time = GameTimeComponent.KEY.get(player.getWorld()).getTime();
+            if (Math.abs(view.getTarget() - time) > 10) offsetDelta = time > view.getTarget() ? .6f : -.6f;
+            if (time < GameConstants.getInTicks(1, 0)) {
+                offsetDelta = -0.9f;
+            } else {
+                offsetDelta = MathHelper.lerp(delta / 16, offsetDelta, 0f);
+            }
+            view.setTarget(time);
+            var r = offsetDelta > 0 ? 1f - offsetDelta : 1f;
+            var g = offsetDelta < 0 ? 1f + offsetDelta : 1f;
+            var b = 1f - Math.abs(offsetDelta);
+            var colour = MathHelper.packRgb(r, g, b) | 0xFF000000;
+            context.getMatrices().push();
+            context.getMatrices().translate(context.getScaledWindowWidth() / 2f, 6, 0);
+            view.render(renderer, context, 0, 0, colour, delta);
+            context.getMatrices().pop();
         }
-        view.setTarget(time);
-        var r = offsetDelta > 0 ? 1f - offsetDelta : 1f;
-        var g = offsetDelta < 0 ? 1f + offsetDelta : 1f;
-        var b = 1f - Math.abs(offsetDelta);
-        var colour = MathHelper.packRgb(r, g, b) | 0xFF000000;
-        context.getMatrices().push();
-        context.getMatrices().translate(context.getScaledWindowWidth() / 2f, 6, 0);
-        view.render(renderer, context, 0, 0, colour, delta);
-        context.getMatrices().pop();
     }
 
     public static void tick() {

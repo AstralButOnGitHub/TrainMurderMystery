@@ -74,12 +74,12 @@ public class PoisonUtils {
 
             if (poisonTicks == -1) {
                 PlayerPoisonComponent.KEY.get(player).setPoisonTicks(
-                        Random.createThreadSafe().nextBetween(PlayerPoisonComponent.clampTime.getLeft(), PlayerPoisonComponent.clampTime.getRight()),
+                        world.getRandom().nextBetween(PlayerPoisonComponent.clampTime.getLeft(), PlayerPoisonComponent.clampTime.getRight()),
                         poisoner
                 );
             } else {
                 PlayerPoisonComponent.KEY.get(player).setPoisonTicks(
-                        MathHelper.clamp(poisonTicks - Random.createThreadSafe().nextBetween(100, 300), 0, PlayerPoisonComponent.clampTime.getRight()),
+                        MathHelper.clamp(poisonTicks - world.getRandom().nextBetween(100, 300), 0, PlayerPoisonComponent.clampTime.getRight()),
                         poisoner
                 );
             }

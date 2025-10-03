@@ -18,6 +18,7 @@ import net.minecraft.util.Rarity;
 
 import java.util.function.ToIntFunction;
 
+@SuppressWarnings("unchecked")
 public interface TMMBlocks {
     BlockRegistrar registrar = new BlockRegistrar(TMM.MOD_ID);
 
@@ -154,7 +155,7 @@ public interface TMMBlocks {
     Block EBONY_BOOKSHELF = registrar.createWithItem("ebony_bookshelf", new Block(AbstractBlock.Settings.copy(EBONY_PLANKS)), TMMItems.BUILDING_GROUP);
 
     // Vents
-    Block STAINLESS_STEEL_VENT_SHAFT = registrar.createWithItem("stainless_steel_vent_shaft", new VentShaftBlock(AbstractBlock.Settings.create().strength(-1.0f, 3600000.0f).sounds(TMMSounds.VENT_SHAFT).mapColor(MapColor.GRAY).notSolid()), TMMItems.DECORATION_GROUP);
+    Block STAINLESS_STEEL_VENT_SHAFT = registrar.createWithItem("stainless_steel_vent_shaft", new VentShaftBlock(AbstractBlock.Settings.create().strength(-1.0f, 3600000.0f).sounds(TMMSounds.VENT_SHAFT).mapColor(MapColor.GRAY)), TMMItems.DECORATION_GROUP);
     Block STAINLESS_STEEL_VENT_HATCH = registrar.createWithItem("stainless_steel_vent_hatch", new VentHatchBlock(AbstractBlock.Settings.copy(STAINLESS_STEEL_VENT_SHAFT).strength(0.3f).sounds(BlockSoundGroup.COPPER).nonOpaque()), TMMItems.DECORATION_GROUP);
     Block DARK_STEEL_VENT_HATCH = registrar.createWithItem("dark_steel_vent_hatch", new VentHatchBlock(AbstractBlock.Settings.copy(STAINLESS_STEEL_VENT_HATCH)), TMMItems.DECORATION_GROUP);
     Block TARNISHED_GOLD_VENT_HATCH = registrar.createWithItem("tarnished_gold_vent_hatch", new VentHatchBlock(AbstractBlock.Settings.copy(STAINLESS_STEEL_VENT_HATCH)), TMMItems.DECORATION_GROUP);
@@ -214,7 +215,7 @@ public interface TMMBlocks {
     Block ELEVATOR_BUTTON = registrar.createWithItem("elevator_button", new ElevatorButtonBlock(AbstractBlock.Settings.copy(SMALL_BUTTON)), TMMItems.DECORATION_GROUP);
     Block STAINLESS_STEEL_SPRINKLER = registrar.createWithItem("stainless_steel_sprinkler", new SprinklerBlock(AbstractBlock.Settings.create().strength(0.5f).nonOpaque().sounds(BlockSoundGroup.LANTERN)), TMMItems.DECORATION_GROUP);
     Block GOLD_SPRINKLER = registrar.createWithItem("gold_sprinkler", new SprinklerBlock(AbstractBlock.Settings.copy(STAINLESS_STEEL_SPRINKLER)), TMMItems.DECORATION_GROUP);
-    Block GOLD_ORNAMENT = registrar.createWithItem("gold_ornament", new OrnamentBlock(AbstractBlock.Settings.create().nonOpaque().notSolid().noCollision().strength(0.25f).sounds(BlockSoundGroup.COPPER)), TMMItems.DECORATION_GROUP);
+    Block GOLD_ORNAMENT = registrar.createWithItem("gold_ornament", new OrnamentBlock(AbstractBlock.Settings.create().nonOpaque().noCollision().strength(0.25f).sounds(BlockSoundGroup.COPPER)), TMMItems.DECORATION_GROUP);
 
     // Doors
     Block SMALL_GLASS_DOOR = registrar.createWithItem("small_glass_door", new SmallDoorBlock(() -> TMMBlockEntities.SMALL_GLASS_DOOR, AbstractBlock.Settings.create().dynamicBounds().strength(-1, 3600000).mapColor(MapColor.CLEAR).dropsNothing().nonOpaque().allowsSpawning(Blocks::never).pistonBehavior(PistonBehavior.BLOCK).sounds(BlockSoundGroup.COPPER_BULB)), TMMItems.DECORATION_GROUP);
