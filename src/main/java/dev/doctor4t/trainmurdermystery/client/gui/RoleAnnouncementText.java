@@ -1,6 +1,9 @@
 package dev.doctor4t.trainmurdermystery.client.gui;
 
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
+import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +45,7 @@ public enum RoleAnnouncementText {
             case NONE -> null;
             case PASSENGERS, TIME -> this == KILLER ? this.getLoseText() : this.winText;
             case KILLERS -> this == KILLER ? this.winText : this.getLoseText();
+            case LOOSE_END -> Text.translatable("announcement.loose_ends.winner" , MinecraftClient.getInstance().player.getUuid().equals(TMMComponents.GAME.get(MinecraftClient.getInstance().world).getLooseEndWinner()));
         };
     }
 }

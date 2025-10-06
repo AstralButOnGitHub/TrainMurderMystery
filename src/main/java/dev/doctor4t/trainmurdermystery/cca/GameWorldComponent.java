@@ -44,6 +44,8 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
 
     private int psychosActive = 0;
 
+    private UUID looseEndWinner;
+
     public GameWorldComponent(World world) {
         this.world = world;
     }
@@ -149,6 +151,15 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
 
     public void setGameMode(GameMode discoveryMode) {
         this.gameMode = discoveryMode;
+        this.sync();
+    }
+
+    public UUID getLooseEndWinner() {
+        return looseEndWinner;
+    }
+
+    public void setLooseEndWinner(UUID looseEndWinner) {
+        this.looseEndWinner = looseEndWinner;
         this.sync();
     }
 
@@ -273,6 +284,27 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
                                 winStatus = GameFunctions.WinStatus.NONE;
                             }
                         }
+                    }
+                }
+
+                // check if last man standing in loose end
+                if (gameMode == GameMode.LOOSE_ENDS) {
+                    int playersLeft = 0;
+                    PlayerEntity lastPlayer = null;
+                    for (PlayerEntity player : world.getPlayers()) {
+                        if (GameFunctions.isPlayerAliveAndSurvival(player)) {
+                            playersLeft++;
+                            lastPlayer = player;
+                        }
+                    }
+
+                    if (playersLeft <= 0) {
+                        GameFunctions.stopGame(serverWorld);
+                    }
+
+                    if (playersLeft == 1) {
+                        setLooseEndWinner(lastPlayer.getUuid());
+                        winStatus = GameFunctions.WinStatus.LOOSE_END;
                     }
                 }
 
